@@ -12,7 +12,7 @@
   <a href="https://github.com/MetOffice/ML-TC/LICENSE">
       <img src="https://img.shields.io/github/license/MetOffice/ML-TC.svg?style=flat-square"
           alt="GitHub license" /></a>
-  
+
   <a href="https://GitHub.com/MetOffice/ML-TC/graphs/contributors/">
        <img src="https://img.shields.io/github/contributors/MetOffice/ML-TC.svg?style=flat-square"
             alt="GitHub contributors" /></a>
@@ -28,6 +28,18 @@ This repository contains code for exploring tropical cyclone data using machine 
 ## Contributing
 
 ## Getting Started
+
+Set-up a coda environment for this repository based on the `requirements.yml` file:
+
+```bash
+conda env create --file requirements.yml
+```
+
+This environment requires ~10GB of disk space.  Then activate the conda environment:
+
+```bash
+conda activate ml-tc
+```
 
 ## Data
 

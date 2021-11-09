@@ -1,6 +1,5 @@
 name: ml-tc
 channels:
-  - pytorch
   - defaults
 dependencies:
   - ipython

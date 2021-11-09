@@ -1,0 +1,22 @@
+name: ml-tc
+channels:
+  - defaults
+dependencies:
+  - ipython
+  - ipython_genutils
+  - libpng
+  - libtiff
+  - matplotlib
+  - numpy
+  - pandas
+  - pickleshare
+  - pillow
+  - pip
+  - pyqt
+  - python=3.8
+  - python-dateutil
+  - pytorch
+  - scipy
+  - setuptools
+  - torchvision
+  - xarray

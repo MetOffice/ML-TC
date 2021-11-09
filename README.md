@@ -24,8 +24,14 @@
 This repository contains code for exploring tropical cyclone data using machine learning techniques.  The machine learning frameworks in this repo are prinicpally based in python, in particular **[pytorch](https://pytorch.org/)**.  Training data comes from a variety of [Met Office](https://www.metoffice.gov.uk/) high resolution models based on the [Unified Model (UM)](https://www.metoffice.gov.uk/research/approach/modelling-systems/unified-model/index).
 
 ## Contents
+Key file and folders
+
+|   |Description |
+|--:|:---|
+| [example_notebook.ipynb](dir/example_notebook.ipynb)  |Description of file/directory   |
 
 ## Contributing
+Information on how to contribute can be found in the [Contributing guide](CONTRIBUTING.md).
 
 ## Getting Started
 

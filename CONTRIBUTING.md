@@ -17,7 +17,7 @@ Remember to activate your new environment:
 conda activate ml-tc
 ```
 
-:exclamation: *Note: We are currently only able to provide some of the original model data used to train the models in this repo, principally due to the data volume.
+:exclamation: *Note: We are currently only able to provide some of the original model data used to train the models in this repo, principally due to the data volume. See [Data](https://github.com/MetOffice/ML-TC/blob/initial-setup/README.md#data) for some data sources.
 
 # Before you start...
 Read through the current issues to see what you can help with.  If you have your own ideas for improvements, please start a new issues so we can track and discuss your improvement. You must create a new branch for any changes you make.

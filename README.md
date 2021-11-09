@@ -49,6 +49,10 @@ conda activate ml-tc
 
 ## Data
 
+Current sources of data used by this repo include:
+
+* [Bangladesh Topical Cyclone Data](https://doi.org/10.5281/zenodo.3600201.) via Zenodo. This data is distributed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/), please cite https://doi.org/10.1038/s41597-021-00847-5 if used.
+
 <h5 align="center">
 <img src="etc/MO_MASTER_black_mono_for_light_backg_RBG.png" width="200" alt="Met Office"> <br>
 &copy; British Crown Copyright, Met Office

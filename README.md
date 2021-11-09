@@ -50,6 +50,6 @@ conda activate ml-tc
 ## Data
 
 <h5 align="center">
-<img src="img/MO_MASTER_black_mono_for_light_backg_RBG.png" width="200" alt="Met Office"> <br>
-&copy; British Crown Copyright 2018 - 2020, Met Office
+<img src="etc/MO_MASTER_black_mono_for_light_backg_RBG.png" width="200" alt="Met Office"> <br>
+&copy; British Crown Copyright, Met Office
 </h5>

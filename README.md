@@ -67,7 +67,7 @@ The Generator aims to produce new datapoints similar to the training dataset, wh
 
 There are currently two GAN architectures, based on [this tutorial](https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html). One produces images of size 64 by 64 and the other produces images of size 256 by 256. Their architectures are detailed below.
 
-# 64 by 64 GAN
+### 64 by 64 GAN
 Generator:
 | Layer                            |  Output Size  |
 |----------------------------------|:-------------:|
@@ -87,7 +87,7 @@ Discriminator:
 | Conv, BatchNorm, Leaky Relu |  256 x 8 x 8  |
 | Conv, BatchNorm, Leaky Relu |  512 x 4 x 4  |
 | Conv, Sigmoid               |       1       |
-# 256 by 256 GAN
+### 256 by 256 GAN
 Generator:
 | Layer                            |   Output Size  |
 |----------------------------------|:--------------:|

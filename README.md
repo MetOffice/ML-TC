@@ -67,7 +67,7 @@ The Generator aims to produce new datapoints similar to the training dataset, wh
 
 There are currently two GAN architectures, based on [this tutorial](https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html). One produces images of size 64 by 64 and the other produces images of size 256 by 256. Their architectures are detailed below.
 
-The specific architecture used for the 64 by 64 GAN can be found [here](64x64 Architecture.md)
+The specific architecture used for the 64 by 64 GAN can be found [here](64x64Architecture.md)
 ### 256 by 256 GAN
 Generator:
 | Layer                            |   Output Size  |

@@ -48,12 +48,14 @@ cd ML-TC
 
 Then, set-up a conda environment for this repository.  Your conda environment will depend on if you have access to GPUs and CUDA.
 
+### CPU architecture
 For a **CPU only** conda environment, use the `requirements.yml` file:
 
 ```bash
 conda env create --file requirements.yml
 ```
 
+### GPU architecture
 For a **GPU** optimised environment, check that you have access to GPUs and CUDA:
 
 ```bash

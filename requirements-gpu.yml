@@ -1,0 +1,25 @@
+name: ml-tc-gpu
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - ipython
+  - ipython_genutils
+  - libpng
+  - libtiff
+  - matplotlib
+  - numpy
+  - pandas
+  - pickleshare
+  - pillow
+  - pip
+  - pyqt
+  - python=3.9
+  - python-dateutil
+  - pytorch
+  - cudatoolkit=11.1
+  - scipy
+  - setuptools
+  - torchvision
+  - xarray
+  - jupyterlab

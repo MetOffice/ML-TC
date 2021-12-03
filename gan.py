@@ -19,7 +19,15 @@ import matplotlib.animation as animation
 from IPython.display import HTML
 import os, pathlib
 import random
+import sys
+import net_architectures
 
+parser = argparse.ArgumentParser(description='Run GAN With Cyclone Data')
+parser.add_argument('format', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='data format to use')
+parser.add_argument('net', metavar='net', type=str, nargs=1, choices=["Large_Net", "Small_Net"], help='which network variation to load')
+parser.add_argument('path', metavar='path', const="/project/ciid/projects/ML-TC/", type=str, nargs="?", help='the base path to use')
+
+args = parser.parse_args()
 
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
@@ -71,169 +79,54 @@ def weights_init(m):
         nn.init.normal_(m.weight.data, 1.0, 0.02)
         nn.init.constant_(m.bias.data, 0)
 
-#https://discuss.pytorch.org/t/how-do-i-print-output-of-each-layer-in-sequential/5773/3
-class PrintLayer(nn.Module):
-    def __init__(self,f):
-        self.f = f
-        super(PrintLayer, self).__init__()
-    
-    def forward(self, x):
-        if self.f:
-            print(x.shape)
-        return x
-
-class Discriminator(nn.Module):
-    def __init__(self, ngpu,f=False):
-        super(Discriminator, self).__init__()
-        self.ngpu = ngpu
-        self.main = nn.Sequential(
-            PrintLayer(f),
-            # input is (nc) x 256 x 256
-            nn.Conv2d(nc, 8, 4, 2, 1, bias=False),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.MaxPool2d(2,1),
-            PrintLayer(f),
-            # state size. 8 x 127 x 127
-            nn.Conv2d(8,16, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(16),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.MaxPool2d(2,1),
-            PrintLayer(f),
-            # state size. 16 x 62 x 62
-            nn.Conv2d(16,32, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(32),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.MaxPool2d(2,1),
-            PrintLayer(f),
-            # state size. 32 x 30 x 30
-            nn.Conv2d(32,64, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(64),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.MaxPool2d(2,1),
-            PrintLayer(f),
-            # state size. 64 x 14 x 14
-            nn.Conv2d(64,128, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.MaxPool2d(2,1),
-            PrintLayer(f),
-            # state size. 128 x 6 x 6
-            nn.Conv2d(128,256, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.MaxPool2d(2,1),
-            PrintLayer(f),
-            # state size. 256 x 2 x 2
-            nn.Flatten(),
-            nn.Linear(1024,128, bias=False),
-            nn.LeakyReLU(0.2, inplace=True),
-            PrintLayer(f),
-            # state size. 128
-            nn.Linear(128,1, bias=False),
-            nn.Sigmoid(),
-            PrintLayer(f)
-            # state size. 1
-        )
-
-    def forward(self, input):
-        return self.main(input)
-
-class Generator(nn.Module):
-
-    def __init__(self, ngpu,f=False):
-        super(Generator, self).__init__()
-        self.ngpu = ngpu
-        self.main = nn.Sequential(
-            PrintLayer(f),
-            # input is 100 x 1 x 1, going into a convolution
-            nn.ConvTranspose2d( nz, 512, 4, 1, 0, bias=False),
-            nn.BatchNorm2d(512),
-            nn.ReLU(True),
-            PrintLayer(f),
-            # state size. (512) x 4 x 4
-            nn.ConvTranspose2d(512, 256, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(256),
-            nn.ReLU(True),
-            PrintLayer(f),
-            # state size. (256) x 8 x 8
-            nn.ConvTranspose2d( 256, 128, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(128),
-            nn.ReLU(True),
-            PrintLayer(f),
-            # state size. (128) x 16 x 16
-            nn.ConvTranspose2d( 128, 64, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU(True),
-            PrintLayer(f),
-            # state size. (64) x 32 x 32
-            nn.ConvTranspose2d( 64,32, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(32),
-            nn.ReLU(True),
-            PrintLayer(f),
-            # state size. 32 x 64 x 64
-            nn.ConvTranspose2d( 32,16, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(16),
-            nn.ReLU(True),
-            PrintLayer(f),
-            # state size. 16 x 128 x 128
-            nn.ConvTranspose2d( 16,8, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(8),
-            nn.ReLU(True),
-            PrintLayer(f),
-            # state size. 8 x 256 x 256
-            nn.Conv2d( 8,nc, 3, 1, 1, bias=False),
-            nn.Tanh(),
-            PrintLayer(f)
-            # state size. 1 x 256 x 256
-        )
-    def forward(self, input):
-        return self.main(input)
-
 def run():
-    t = open("text.txt", "a")
-    t.write("Now the file has more content!")
-    t.close()
+    base_path="/project/ciid/projects/ML-TC/"
+    data_path=base_path+"Data/"
+    num=0
+    for dir in [name for name in os.listdir(base_path)]:
+        # print(dir)
+        if dir.isnumeric():
+            num=max(num,int(dir))
+    save_path=base_path+str(num+1)+"/"
+    os.mkdir(save_path)
+    sys.stdout = open(save_path+'output.txt', 'w+')
+    print(save_path)
+    t = open(save_path+"text.txt", "a")
+    t.write("Run starting")
     # Set random seed for reproducibility
-    # manualSeed = 999
-    manualSeed = random.randint(1, 10000) # use if you want new results
-    print("Random Seed: ", manualSeed)
+    manualSeed = 357
+    # manualSeed = random.randint(1, 10000) # use if you want new results
+    t.write("Random Seed: "+str(manualSeed))
+    t.close()
     random.seed(manualSeed)
     torch.manual_seed(manualSeed)
-    path=str(pathlib.Path(__file__).parent)+"/eyes/"
+    # path=str(pathlib.Path(__file__).parent)+"/Data/"
     data=[]
-    for f in os.listdir(path):
+    for f in os.listdir(data_path):
         # print(len(data))
-        if f.endswith(".npz") and "fg_cut" in f:
-            print(f)
-            t = open("text.txt", "a")
+        if f.endswith(".npz") and args.format[0] in f:
+            t = open(save_path+"text.txt", "a")
             t.write(f)
             t.close()
-            datapoint=np.load(path+f, allow_pickle=True)
+            datapoint=np.load(data_path+f, allow_pickle=True)
             for x in datapoint['arr_0']:
                 # print(len(data))
                 # print(x.shape)
-                if x.shape == (256,256) and np.count_nonzero(~np.isnan(x)) > 3000:
+                s=x.shape
+                if s.count(s[0]) == len(s) and np.count_nonzero(~np.isnan(x)) > 3000:
                     # print(x.shape)
                     data.append(torch.from_numpy(np.nan_to_num(x)))
     # print(len(data))
     random.shuffle(data)
 
     # for x in data:
-    #     plt.imshow(x, cmap='gray', vmin=0, vmax=255)
+    #     plt.imshow(x)
     #     plt.show()
-    
+    # input()
     data=torch.stack(data)
     data=data/(data.max()/2)-1
     dataset=TensorDataset(data)
-    # # We can use an image folder dataset the way we have it setup.
-    # # Create the dataset
-    # dataset = dset.ImageFolder(root=dataroot,
-    #                         transform=transforms.Compose([
-    #                             transforms.Resize(image_size),
-    #                             transforms.CenterCrop(image_size),
-    #                             transforms.ToTensor(),
-    #                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-    #                         ]))
+
     # # Create the dataloader
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                             shuffle=True, num_workers=workers)
@@ -241,20 +134,11 @@ def run():
     # # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
 
-    # Plot some training images
-    # real_batch = next(iter(dataloader))
-
-   
-    # for batch in dataloader:
-    #     print("g")
-    #     plt.figure(figsize=(8,8))
-    #     plt.axis("off")
-    #     plt.title("Training Images")
-    #     plt.imshow(np.transpose(vutils.make_grid(batch[0].to(device)[:64], padding=2, normalize=True).cpu(),(1,2,0)))
-    #     plt.show()
+    # Get the right architecture class
+    arch=eval('net_architectures.'+args.net[0])
 
     # Create the generator
-    netG = Generator(ngpu, True).to(device)
+    netG = arch.Generator(ngpu,nc, nz, True).to(device)
 
     # Handle multi-gpu if desired
     if (device.type == 'cuda') and (ngpu > 1):
@@ -268,7 +152,7 @@ def run():
     # print(netG)
 
     # Create the Discriminator
-    netD = Discriminator(ngpu, True).to(device)
+    netD = arch.Discriminator(ngpu,nc, True).to(device)
 
     # Handle multi-gpu if desired
     if (device.type == 'cuda') and (ngpu > 1):
@@ -304,15 +188,16 @@ def run():
     D_losses = []
     iters = 0
 
+    t = open(save_path+"text.txt", "a")
     print("Starting Training Loop...")
+    t.close()
     # For each epoch
     for epoch in range(num_epochs):
-        t = open("text.txt", "a")
-        t.write(str(epoch))
+        t = open(save_path+"text.txt", "a")
+        t.write(str(epoch)+str(", "))
         t.close()
         # For each batch in the dataloader
         for i, data in enumerate(dataloader, 0):
-
             ############################
             # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
             ###########################
@@ -381,24 +266,25 @@ def run():
                 with torch.no_grad():
                     fake = netG(fixed_noise).detach().cpu().numpy()
                 img_list.append(fake)
-                np.save("produced.npy",img_list)
+                np.save(save_path+"produced.npy",img_list)
 
             iters += 1
 
-    plt.figure(figsize=(10,5))
-    plt.title("Generator and Discriminator Loss During Training")
-    plt.plot(G_losses,label="G")
-    plt.plot(D_losses,label="D")
-    plt.xlabel("iterations")
-    plt.ylabel("Loss")
-    plt.legend()
-    plt.savefig("loss.png")
+        plt.figure(figsize=(10,5))
+        plt.title("Generator and Discriminator Loss During Training")
+        plt.plot(G_losses,label="G")
+        plt.plot(D_losses,label="D")
+        plt.xlabel("iterations")
+        plt.ylabel("Loss")
+        plt.legend()
+        plt.savefig(save_path+"loss.png")
+        plt.close()
 
     PATH = "netG.pt"
-    torch.save(netG, PATH)
+    torch.save(netG, save_path+PATH)
     
     PATH = "netD.pt"
-    torch.save(netD, PATH)
+    torch.save(netD, save_path+PATH)
     
     # fig = plt.figure(figsize=(8,8))
     # plt.axis("off")
@@ -412,3 +298,4 @@ def run():
 if __name__ == '__main__':
     print('starting')    
     run()
+    sys.stdout.close()

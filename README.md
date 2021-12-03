@@ -39,16 +39,49 @@ Information on how to contribute can be found in the [Contributing guide](CONTRI
 
 ## Getting Started
 
-Set-up a coda environment for this repository based on the `requirements.yml` file:
+Start by cloning this github repo:
+
+```bash
+git clone https://github.com/MetOffice/ML-TC.git
+cd ML-TC
+```
+
+Then, set-up a conda environment for this repository.  Your conda environment will depend on if you have access to GPUs and CUDA.
+
+For a **CPU only** conda environment, use the `requirements.yml` file:
 
 ```bash
 conda env create --file requirements.yml
 ```
 
-This environment requires ~10GB of disk space.  Then activate the conda environment:
+For a **GPU** optimised environment, check that you have access to GPUs and CUDA:
+
+```bash
+nvcc --version
+lspci | grep -i nvidia
+```
+
+If these return scucesfully, then use the `requirements-gpu.yml` file:
+
+```bash
+conda env create --file requirements-gpu.yml
+```
+
+These environment requires ~10GB of disk space.  Then activate the conda environment:
 
 ```bash
 conda activate ml-tc
+```
+```bash
+conda activate ml-tc-gpu
+```
+
+To check if your GPU driver and CUDA is enabled and accessible by PyTorch, in `python` run:
+
+```python
+>>> import torch
+>>> torch.cuda.is_available()
+True
 ```
 
 ## Data

@@ -53,6 +53,11 @@ Current sources of data used by this repo include:
 
 * [Bangladesh Topical Cyclone Data](https://doi.org/10.5281/zenodo.3600201.) via Zenodo. This data is distributed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/), please cite https://doi.org/10.1038/s41597-021-00847-5 if used.
 
+To download the data use Curl:
+curl -# -o rashmi.tar https://zenodo.org/api/files/476d7685-0a99-4f35-a32d-f6951e89dfec/tsens.[file].tar.gz
+
+where [file] should be replaced with the capitalised name of the cyclone you want to download.
+
 <h5 align="center">
 <img src="etc/MO_MASTER_black_mono_for_light_backg_RBG.png" width="200" alt="Met Office"> <br>
 &copy; British Crown Copyright, Met Office

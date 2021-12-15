@@ -25,9 +25,10 @@ import net_architectures
 parser = argparse.ArgumentParser(description='Run GAN With Cyclone Data')
 parser.add_argument('format', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='data format to use')
 parser.add_argument('net', metavar='net', type=str, nargs=1, choices=["Large_Net", "Small_Net"], help='which network variation to load')
-parser.add_argument('path', metavar='path', const="/project/ciid/projects/ML-TC/", type=str, nargs="?", help='the base path to use')
+parser.add_argument('path', metavar='path', default="/project/ciid/projects/ML-TC/", type=str, nargs="?", help='the base path to use')
 
 args = parser.parse_args()
+print(args)
 
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
@@ -80,7 +81,7 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 def run():
-    base_path="/project/ciid/projects/ML-TC/"
+    base_path=args.path
     data_path=base_path+"Data/"
     num=0
     for dir in [name for name in os.listdir(base_path)]:

@@ -9,9 +9,9 @@ from scipy.ndimage.filters import uniform_filter as unif2D
 import argparse
 
 parser = argparse.ArgumentParser(description='Preprocess Cyclone Data')
-parser.add_argument('-f', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='the data format to use')
-parser.add_argument('-h', metavar='hurricane', type=str, nargs=1, help='the name of the curricane to extract data from')
-parser.add_argument('-v', metavar='N', type=int, nargs='+', choices=['fg','hur','prlssn','prlst','psl','rsds','rsnds','tas','ua','va','wbpt','zg'], help='the variables to extract')
+parser.add_argument('--f', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='the data format to use')
+parser.add_argument('--h', metavar='hurricane', type=str, nargs=1, help='the name of the curricane to extract data from')
+parser.add_argument('--v', metavar='variables', type=str, nargs='+', choices=['fg','hur','prlssn','prlst','psl','rsds','rsnds','tas','ua','va','wbpt','zg'], help='the variables to extract')
 args = parser.parse_args()
 print(args)
 def largest_sum(a, n):
@@ -23,8 +23,8 @@ def largest_sum(a, n):
 files=os.listdir()
 
 ## load hurricane 	
-variables = args.variables
-hurricane = args.hurricane
+variables = args.v
+hurricane = args.h
 files=[f for f in files if '4p4km' in f and 'point' in f and hurricane in f and (v in f for v in variables)]
 print(files)
 input()

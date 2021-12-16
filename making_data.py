@@ -10,11 +10,11 @@ import argparse
 
 vars={'fg':'wind_speed_of_gust','hur':'relative_humidity','psl':'air_pressure_at_sea_level','rsds':'surface_downwelling_shortwave_flux_in_air','rsnds':'net_down_surface_sw_flux_corrected','tas':'air_temperature','ua':'x_wind','va':'y_wind','wbpt':'wet_bulb_potential_temperature','zg':'geopotential_height'}
 
-
 parser = argparse.ArgumentParser(description='Preprocess Cyclone Data')
 parser.add_argument('--f', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='the data format to use')
-parser.add_argument('--h', metavar='hurricane', type=str, nargs=1, help='the name of the curricane to extract data from')
-parser.add_argument('--v', metavar='variables', type=str, nargs='+', choices=['fg','hur','prlssn','prlst','psl','rsds','rsnds','tas','ua','va','wbpt','zg'], help='the variables to extract')
+parser.add_argument('--h', metavar='hurricane', type=str, nargs=1, help='the name of the hurricane to extract data from')
+parser.add_argument('--p', metavar='pressure', type=int, default=200,nargs='?', help='the pressure level to use where needed')
+parser.add_argument('--v', metavar='variables', type=str, nargs='+', choices=['fg','hur','psl','rsds','rsnds','tas','ua','va','wbpt','zg'], help='the variables to extract')
 args = parser.parse_args()
 print(args)
 def largest_sum(a, n):
@@ -52,7 +52,10 @@ for variable in variables:
 
     for data_point_time in wind.forecast_reference_time:
         for data_point_period in wind.forecast_period:
-            single_data_point = wind.loc[dict(forecast_reference_time=data_point_time, forecast_period = data_point_period)]
+            if variable in ['hur','va','wbpt','zg']:
+                single_data_point = wind.loc[dict(pressure=args.p,forecast_reference_time=data_point_time, forecast_period = data_point_period)]
+            else: 
+                single_data_point = wind.loc[dict(forecast_reference_time=data_point_time, forecast_period = data_point_period)]
             single_data_point = single_data_point.values
             print(single_data_point.shape) 
             (r, c) = largest_sum(single_data_point, n = 50)

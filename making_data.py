@@ -42,9 +42,9 @@ for variable in variables:
     # centres_cols = []
     # centres_rows = []
     valid = []
-    if args.format[0]!="C":
+    if args.f[0]!="C":
         size = 256
-    elif args.format[0]=="C":
+    elif args.f[0]=="C":
         size=64
     side = int((size)/2)
 
@@ -64,27 +64,27 @@ for variable in variables:
             data_points_centre = single_data_point[r-side:r+side, c-side:c+side]
             centre_data_points.append(data_points_centre.copy())
                 
-            if args.format[0]=="D":
+            if args.f[0]=="D":
                 single_data_point[single_data_point < 26.5] = 'NaN'
-            elif args.format[0]=="E":
+            elif args.f[0]=="E":
                 single_data_point[single_data_point < 3*np.mean(single_data_point)] = 'NaN'
             back = np.zeros_like(single_data_point)
             back[:] = np.nan
-            if args.format[0]!="A":
+            if args.f[0]!="A":
                 back[r-side:r+side, c-side:c+side] = single_data_point[r-side:r+side, c-side:c+side]
             else:
                 back=single_data_point
             all_data_points.append(back.copy())
             
-            if args.format[0]!="A":
+            if args.f[0]!="A":
                 data_points_centre = single_data_point[r-side:r+side, c-side:c+side]
             else:
                 data_points_centre = single_data_point
             # back[r-side:r+side, c-side:c+side] = data_points_centre
             #filter out empty points
-            if np.count_nonzero(~np.isnan(data_points_centre)) > 3000 and (args.format[0]=="A" or (len(data_points_centre)==size and len(data_points_centre[0])==size)):
+            if np.count_nonzero(~np.isnan(data_points_centre)) > 3000 and (args.f[0]=="A" or (len(data_points_centre)==size and len(data_points_centre[0])==size)):
                 centre_data_points_cut.append(data_points_centre)
                 
     print(len(centre_data_points_cut))
     ## save the results
-    np.savez("/project/ciid/projects/ML-TC/Data/"+hurricane+"_"+args.format[0]+".npz",centre_data_points_cut)
+    np.savez("/project/ciid/projects/ML-TC/Data/"+hurricane+"_"+args.f[0]+".npz",centre_data_points_cut)

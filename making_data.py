@@ -24,7 +24,7 @@ def largest_sum(a, n):
 # zg.T3Hpoint.UMRA2T.19951123_19951126.BOB07.4p4km.nc
 # zg.T3Hpoint.UMRA2T.19910428_19910501.BOB01.4p4km.nc
 files=os.listdir('../RawData/')
-
+print(files)
 ## load hurricane 	
 variables = args.v
 hurricane = args.h[0]
@@ -34,7 +34,7 @@ for variable in variables:
     wind = xr.open_dataset('../RawData/'+files[0])
     # print(wind)
     print(wind)
-    wind = wind[vars[args.v[0]]]
+    wind = wind[vars[variable]]
 
     all_data_points = []
     centre_data_points = []
@@ -92,4 +92,4 @@ for variable in variables:
                 
     print(len(centre_data_points_cut))
     ## save the results
-    np.savez("/project/ciid/projects/ML-TC/Data/"+hurricane+"_"+args.f[0]+".npz",centre_data_points_cut)
+    np.savez("/projects/metoffice/ml-tc/Data/"+hurricane+"_"+args.f[0]+"_"+variable+".npz",centre_data_points_cut)

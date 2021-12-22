@@ -25,7 +25,7 @@ import net_architectures
 parser = argparse.ArgumentParser(description='Run GAN With Cyclone Data')
 parser.add_argument('format', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='data format to use')
 parser.add_argument('net', metavar='net', type=str, nargs=1, choices=["Large_Net", "Small_Net"], help='which network variation to load')
-parser.add_argument('path', metavar='path', default="/project/ciid/projects/ML-TC/", type=str, nargs="?", help='the base path to use')
+parser.add_argument('path', metavar='path', default="/projects/metoffice/ml-tc/", type=str, nargs="?", help='the base path to use')
 
 args = parser.parse_args()
 print(args)
@@ -64,7 +64,7 @@ lr = 0.0002
 beta1 = 0.5
 
 # Number of GPUs available. Use 0 for CPU mode.
-ngpu = 0
+ngpu = 1
 
 # Frequency of printing training stats (in steps)
 print_freq = 50
@@ -134,7 +134,12 @@ def run():
                                             
     # # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
-
+    #print(str(torch.cuda.is_available()))
+    t = open(save_path+'text.txt', 'w+')
+    t.write(str(torch.cuda.is_available()))
+   # t.write(cudaRuntimeGetVersion())
+   #t.write(str(torch.cuda.current_device()))
+    t.close()
     # Get the right architecture class
     arch=eval('net_architectures.'+args.net[0])
 

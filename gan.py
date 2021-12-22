@@ -26,10 +26,10 @@ parser = argparse.ArgumentParser(description='Run GAN With Cyclone Data')
 parser.add_argument('format', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='data format to use')
 parser.add_argument('net', metavar='net', type=str, nargs=1, choices=["Large_Net", "Small_Net"], help='which network variation to load')
 parser.add_argument('path', metavar='path', default="/project/ciid/projects/ML-TC/", type=str, nargs="?", help='the base path to use')
-
+parser.add_argument('--vars', nargs="+", help="the set of variables to use")
 args = parser.parse_args()
 print(args)
-
+# input()
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 # Number of workers for dataloader

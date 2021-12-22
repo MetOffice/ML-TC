@@ -58,7 +58,13 @@ curl -# -o [cyclone].tar https://zenodo.org/api/files/476d7685-0a99-4f35-a32d-f6
 
 where [cyclone] should be replaced with the capitalised name of the cyclone you want to download. 
 
-To download the data for all the cyclones easily, simply run getbengaldata.sh.
+The file getbengaldata.sh will download the cyclone data, unzip it, and run the data preparation script on it for the requested format and variables. The raw data will be temporarily stored in a folder called RawData while this runs, and the produced data will be stored in a folder called Data.
+
+Example:
+
+> ./getbengaldata.sh A "fg hur"
+
+This will produce data in format A for the variables fg and hur.
 
 <h5 align="center">
 <img src="etc/MO_MASTER_black_mono_for_light_backg_RBG.png" width="200" alt="Met Office"> <br>

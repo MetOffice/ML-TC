@@ -30,9 +30,9 @@ This repository contains code for exploring tropical cyclone data using machine 
 ## Contents
 Key file and folders
 
-|   |Description |
+| Directory |Description |
 |--:|:---|
-| [example_notebook.ipynb](dir/example_notebook.ipynb)  |Description of file/directory   |
+| [01-basic-GAN](01-basic-GAN/01-README-basic-GAN.md) | Basic GAN with 64x64 and 256x256 architectures.   |
 
 ## Contributing
 Information on how to contribute can be found in the [Contributing guide](CONTRIBUTING.md).
@@ -91,6 +91,19 @@ True
 Current sources of data used by this repo include:
 
 * [Bangladesh Topical Cyclone Data](https://doi.org/10.5281/zenodo.3600201.) via Zenodo. This data is distributed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/), please cite https://doi.org/10.1038/s41597-021-00847-5 if used.
+
+To download the data use Curl:
+curl -# -o [cyclone].tar https://zenodo.org/api/files/476d7685-0a99-4f35-a32d-f6951e89dfec/tsens.[cyclone].tar.gz
+
+where [cyclone] should be replaced with the capitalised name of the cyclone you want to download. 
+
+The file getbengaldata.sh will download the cyclone data, unzip it, and run the data preparation script on it for the requested format and variables. The raw data will be temporarily stored in a folder called RawData while this runs, and the produced data will be stored in a folder called Data.
+
+Example:
+
+> ./getbengaldata.sh A "fg hur"
+
+This will produce data in format A for the variables fg and hur.
 
 <h5 align="center">
 <img src="etc/MO_MASTER_black_mono_for_light_backg_RBG.png" width="200" alt="Met Office"> <br>

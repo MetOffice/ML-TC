@@ -11,7 +11,7 @@ $ ssh login-01.isambard.gw4.ac.uk
 
 2. **Activate conda** 
 
-:exclamation: This should be a one time only step... :exclamation:
+:exclamation: This should be a one time only step...
 
 ```Shell
 [<user>@login-01 ~]$ module use /software/x86/modulefiles/
@@ -82,7 +82,7 @@ cd /home/<user>/pbs.<job-id>.gw4head.x8z
 (base) [<user>@pascal-002 ~]$ cd /home/mo-hsteptoe/pbs.<job-id>.gw4head.x8z
 (base) [<user>@pascal-002 pbs.<job-id>.gw4head.x8z]$
 ```
-:question: I don't understand why it automatically drops you into a job-id specific folder... :question:
+:question: I don't understand why it automatically drops you into a job-id specific folder...
 
 Now reactivate your conda `ml-tc` environment and check pytorch:
 
@@ -95,5 +95,6 @@ Now reactivate your conda `ml-tc` environment and check pytorch:
 >>> torch.cuda.is_available()
 True
 ```
+If this returns `True` then pytorch can see the GPUs.
 
-:exclamation: The default `qsub` interactive wallclock limit is short, so be sure to start a new interactive session with a specified walltime for a longer session :exclamation:
+:exclamation: The default `qsub` interactive time limit is short, so be sure to start a new interactive session with a specified walltime for a longer session

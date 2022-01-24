@@ -98,3 +98,22 @@ True
 If this returns `True` then pytorch can see the GPUs.
 
 :exclamation: The default `qsub` interactive time limit is short, so be sure to start a new interactive session with a specified walltime for a longer session
+
+## Batch Submission to GPUs
+
+For batch submissio via `qsub` you need to explicityly set `CUDA_VISIBLE_DEVICES` environment variable for `pytorch` to access the GPUs.
+
+This can be done in two ways.  Via your batch submission script, run before your `pytorch` code:
+
+```Shell
+export CUDA_VISIBLE_DEVICES=0,1
+python3 <pytorch-script.py>
+```
+
+or at the start of your python script
+
+```Python
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+```

@@ -1,5 +1,3 @@
-# from __future__ import print_function
-#%matplotlib inline
 import argparse
 import os
 import random
@@ -16,7 +14,6 @@ import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from IPython.display import HTML
 import os, pathlib
 import random
 import sys
@@ -30,7 +27,7 @@ parser = argparse.ArgumentParser(description='Run GAN With Cyclone Data')
 parser.add_argument('format', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='data format to use')
 parser.add_argument('net', metavar='net', type=str, nargs=1, choices=["Large_Net", "Small_Net"], help='which network variation to load')
 
-parser.add_argument('path', metavar='path', default="/lustre/projects/metoffice/ml-tc", type=str, nargs="?", help='the base path to use')
+parser.add_argument('path', metavar='path', default="/lustre/projects/metoffice/ml-tc/", type=str, nargs="?", help='the base path to use')
 parser.add_argument('--vars', nargs="+", help="the set of variables to use")
 
 args = parser.parse_args()
@@ -39,52 +36,28 @@ print(args)
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 # Set Global Vars ----------------------------------------------
+DATAPATH = args.path + '/Data/'  # Data directory
+OUTPATH = args.path + '/output/01-basic-GAN/'  # Ouput directory
 
-# Number of workers for dataloader
-WORKERS = 0
+CHECK_CUDA = True  # Optional: print basic CUDA checks to output file
+WORKERS = 0  # Number of workers for dataloader
+BATCH_SIZE = 128  # Batch size during training
+IMAGE_SIZE = 256  # Spatial size of training images. All images will be resized to this size using a transformer.
+CHANNELS = 1  # Number of channels in the training images. For color images this is 3
 
-# Batch size during training
-BATCH_SIZE = 128
+NZ = 100  # Size of z latent vector (i.e. size of generator input)
+NGF = 64  # Size of feature maps in generator
+NDF = 64  # Size of feature maps in discriminator
 
-# Spatial size of training images. All images will be resized to this
-#   size using a transformer.
-IMAGE_SIZE = 256
+NUM_EPOCHS = 10  # Number of training epochs
+LR = 0.0002  # Learning rate for optimizers
 
-# Number of channels in the training images. For color images this is 3
-CHANNELS = 1
+BETA1 = 0.5  # Beta1 hyperparam for Adam optimizers
+NGPU = 2  # Number of GPUs available. Use 0 for CPU mode.
+PRINT_FREQ = 50  # Frequency of printing training stats (in steps)
+TEST_FREQ = 500  # Frequency of testing the generator (in steps)
 
-# Size of z latent vector (i.e. size of generator input)
-NZ = 100
-
-# Size of feature maps in generator
-NGF = 64
-
-# Size of feature maps in discriminator
-NDF = 64
-
-# Number of training epochs
-NUM_EPOCHS = 1000
-
-# Learning rate for optimizers
-LR = 0.0002
-
-# Beta1 hyperparam for Adam optimizers
-BETA1 = 0.5
-
-# Number of GPUs available. Use 0 for CPU mode.
-NGPU = 2
-
-# Frequency of printing training stats (in steps)
-PRINT_FREQ = 50
-
-# Frequency of testing the generator (in steps)
-TEST_FREQ = 500
-
-# Ouput directory
-OUTPATH = args.path
-
-# Set random seed for reproducibility
-SEED = 357
+SEED = 357  # Set random seed for reproducibility
 # SEED = random.randint(1, 10000) # use if you want new results
 
 def weights_init(m):
@@ -95,35 +68,46 @@ def weights_init(m):
         nn.init.normal_(m.weight.data, 1.0, 0.02)
         nn.init.constant_(m.bias.data, 0)
 
+def print_CUDA_status():
+    """
+    Print some basic CUDA checks
+    """
+    print('-'*20)
+    print(f'CUDA is available: {str(torch.cuda.is_available())}')
+    print(f'Visible GPUs: {os.environ["CUDA_VISIBLE_DEVICES"]}')
+    print(f'pytorch {torch.__version__}')
+    print('-'*20)
+
+
 def run():
+    if CHECK_CUDA: print_CUDA_status()
+    
     base_path=args.path
-    data_path=base_path+"Data/"
     num=0
     for dir in [name for name in os.listdir(base_path)]:
         # print(dir)
         if dir.isnumeric():
             num=max(num,int(dir))
-    save_path=base_path+str(num+1)+"/"
+    save_path=OUTPATH+str(num+1)+"/"
     os.mkdir(save_path)
     sys.stdout = open(save_path+'output.txt', 'w+')
     print(save_path)
-    t = open(save_path+"text.txt", "a")
-    t.write("Run starting")
     
-    t.write("Random Seed: "+str(SEED))
-    t.close()
+    print("Run starting")
+    print("Random Seed: "+str(SEED))
+
     random.seed(SEED)
     torch.manual_seed(SEED)
     
     # path=str(pathlib.Path(__file__).parent)+"/Data/"
     data=[]
-    for f in os.listdir(data_path):
+    for f in os.listdir(DATAPATH):
         # print(len(data))
         if f.endswith(".npz") and args.format[0] in f:
             t = open(save_path+"text.txt", "a")
             t.write(f)
             t.close()
-            datapoint=np.load(data_path+f, allow_pickle=True)
+            datapoint=np.load(DATAPATH+f, allow_pickle=True)
             for x in datapoint['arr_0']:
                 # print(len(data))
                 # print(x.shape)
@@ -134,10 +118,6 @@ def run():
     # print(len(data))
     random.shuffle(data)
 
-    # for x in data:
-    #     plt.imshow(x)
-    #     plt.show()
-    # input()
     data=torch.stack(data)
     data=data/(data.max()/2)-1
     dataset=TensorDataset(data)
@@ -148,12 +128,7 @@ def run():
                                             
     # # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and NGPU > 0) else "cpu")
-    #print(str(torch.cuda.is_available()))
-    t = open(save_path+'text.txt', 'w+')
-    t.write(str(torch.cuda.is_available()))
-   # t.write(cudaRuntimeGetVersion())
-   #t.write(str(torch.cuda.current_device()))
-    t.close()
+
     # Get the right architecture class
     arch=eval('net_architectures.'+args.net[0])
 
@@ -169,7 +144,7 @@ def run():
     netG.apply(weights_init)
 
     # Print the model
-    # print(netG)
+    print(netG)
 
     # Create the Discriminator
     netD = arch.Discriminator(NGPU,CHANNELS, True).to(device)
@@ -183,7 +158,7 @@ def run():
     netD.apply(weights_init)
 
     # Print the model
-    # print(netD)
+    print(netD)
      
     # Initialize BCELoss function
     criterion = nn.BCELoss()
@@ -208,14 +183,10 @@ def run():
     D_losses = []
     iters = 0
 
-    t = open(save_path+"text.txt", "a")
     print("Starting Training Loop...")
-    t.close()
     # For each epoch
     for epoch in range(NUM_EPOCHS):
-        t = open(save_path+"text.txt", "a")
-        t.write(str(epoch)+str(", "))
-        t.close()
+        print(f'Epoch: {epoch}')
         # For each batch in the dataloader
         for i, data in enumerate(dataloader, 0):
             ############################
@@ -273,9 +244,9 @@ def run():
 
             # Output training stats
             if iters % PRINT_FREQ == 0:
-                print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
-                    % (epoch, NUM_EPOCHS, i, len(dataloader),
-                        errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+                print(f'[{epoch}/{NUM_EPOCHS}][{i}/{len(dataloader)}] /
+                \tLoss_D: {errD.item():.4f} / \tLoss_G: {errG.item():.4f} /
+                \tD(x): {D_x:.4f}\tD(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}')
 
             # Save Losses for plotting later
             G_losses.append(errG.item())
@@ -300,11 +271,9 @@ def run():
         plt.savefig(save_path+"loss.png")
         plt.close()
 
-    PATH = "netG.pt"
-    torch.save(netG, save_path+PATH)
-    
-    PATH = "netD.pt"
-    torch.save(netD, save_path+PATH)
+    # Save pytorch objects
+    torch.save(netG, save_path+"netG.pt")    
+    torch.save(netD, save_path+"netD.pt")
     
     # fig = plt.figure(figsize=(8,8))
     # plt.axis("off")

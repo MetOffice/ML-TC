@@ -1,6 +1,7 @@
 import argparse
 import os
 import random
+from datetime import datetime
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -40,6 +41,8 @@ DATAPATH = args.path + '/Data/'  # Data directory
 OUTPATH = args.path + '/output/01-basic-GAN/'  # Ouput directory
 
 CHECK_CUDA = True  # Optional: print basic CUDA checks to output file
+NGPU = torch.cuda.device_count()  # Number of GPUs available. Use 0 for CPU mode.
+
 WORKERS = 0  # Number of workers for dataloader
 BATCH_SIZE = 128  # Batch size during training
 IMAGE_SIZE = 256  # Spatial size of training images. All images will be resized to this size using a transformer.
@@ -49,11 +52,11 @@ NZ = 100  # Size of z latent vector (i.e. size of generator input)
 NGF = 64  # Size of feature maps in generator
 NDF = 64  # Size of feature maps in discriminator
 
-NUM_EPOCHS = 10  # Number of training epochs
+NUM_EPOCHS = 1000  # Number of training epochs
 LR = 0.0002  # Learning rate for optimizers
 
 BETA1 = 0.5  # Beta1 hyperparam for Adam optimizers
-NGPU = 2  # Number of GPUs available. Use 0 for CPU mode.
+
 PRINT_FREQ = 50  # Frequency of printing training stats (in steps)
 TEST_FREQ = 500  # Frequency of testing the generator (in steps)
 
@@ -83,34 +86,26 @@ def run():
     if CHECK_CUDA: print_CUDA_status()
     
     base_path=args.path
-    num=0
-    for dir in [name for name in os.listdir(base_path)]:
-        # print(dir)
-        if dir.isnumeric():
-            num=max(num,int(dir))
-    save_path=OUTPATH+str(num+1)+"/"
+
+    # Create dedicated output directory for this trial
+    save_path=OUTPATH+datetime.now().strftime("%Y%m%dT%H%M/")
     os.mkdir(save_path)
-    sys.stdout = open(save_path+'output.txt', 'w+')
-    print(save_path)
+    print(f'Saving this run to {save_path}')
     
-    print("Run starting")
+    print("Run starting...")
     print("Random Seed: "+str(SEED))
 
     random.seed(SEED)
     torch.manual_seed(SEED)
     
-    # path=str(pathlib.Path(__file__).parent)+"/Data/"
     data=[]
     for f in os.listdir(DATAPATH):
         # print(len(data))
         if f.endswith(".npz") and args.format[0] in f:
-            t = open(save_path+"text.txt", "a")
-            t.write(f)
-            t.close()
+            print(f'Data: {f}')
+            # Load pickled arrays
             datapoint=np.load(DATAPATH+f, allow_pickle=True)
             for x in datapoint['arr_0']:
-                # print(len(data))
-                # print(x.shape)
                 s=x.shape
                 if s.count(s[0]) == len(s) and np.count_nonzero(~np.isnan(x)) > 3000:
                     # print(x.shape)
@@ -119,15 +114,19 @@ def run():
     random.shuffle(data)
 
     data=torch.stack(data)
+    
+    # Transform data TODO:Check for better method
     data=data/(data.max()/2)-1
     dataset=TensorDataset(data)
 
-    # # Create the dataloader
+    # Create the dataloader
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE,
                                             shuffle=True, num_workers=WORKERS)
                                             
     # # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and NGPU > 0) else "cpu")
+    # cuda0 = torch.device("cuda:0")
+    # cuda1 = torch.device("cuda:1")
 
     # Get the right architecture class
     arch=eval('net_architectures.'+args.net[0])
@@ -143,7 +142,7 @@ def run():
     #  to mean=0, stdev=0.2.
     netG.apply(weights_init)
 
-    # Print the model
+    # Print the generator model
     print(netG)
 
     # Create the Discriminator
@@ -157,7 +156,7 @@ def run():
     #  to mean=0, stdev=0.2.
     netD.apply(weights_init)
 
-    # Print the model
+    # Print the discriminator model
     print(netD)
      
     # Initialize BCELoss function
@@ -244,9 +243,7 @@ def run():
 
             # Output training stats
             if iters % PRINT_FREQ == 0:
-                print(f'[{epoch}/{NUM_EPOCHS}][{i}/{len(dataloader)}] /
-                \tLoss_D: {errD.item():.4f} / \tLoss_G: {errG.item():.4f} /
-                \tD(x): {D_x:.4f}\tD(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}')
+                print(f'[{epoch}/{NUM_EPOCHS}][{i}/{len(dataloader)}]\tLoss_D: {errD.item():.4f} / \tLoss_G: {errG.item():.4f}\tD(x): {D_x:.4f}\tD(G(z)): {D_G_z1:.4f} / {D_G_z2:.4f}')
 
             # Save Losses for plotting later
             G_losses.append(errG.item())
@@ -285,6 +282,5 @@ def run():
 
 
 if __name__ == '__main__':
-    print('starting')    
     run()
     sys.stdout.close()

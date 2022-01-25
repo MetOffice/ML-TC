@@ -24,11 +24,13 @@ import net_architectures
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
+# Parse command line arguments
 parser = argparse.ArgumentParser(description='Run GAN With Cyclone Data')
 parser.add_argument('format', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='data format to use')
 parser.add_argument('net', metavar='net', type=str, nargs=1, choices=["Large_Net", "Small_Net"], help='which network variation to load')
 
 parser.add_argument('path', metavar='path', default="/lustre/projects/metoffice/ml-tc/", type=str, nargs="?", help='the base path to use')
+parser.add_argument('-p', metavar='doplot', action='store_true', help='Plot the final output')
 parser.add_argument('--vars', nargs="+", help="the set of variables to use")
 
 args = parser.parse_args()
@@ -272,15 +274,18 @@ def run():
     torch.save(netG, save_path+"netG.pt")    
     torch.save(netD, save_path+"netD.pt")
     
-    # fig = plt.figure(figsize=(8,8))
-    # plt.axis("off")
-    # ims = [[plt.imshow(np.transpose(i,(1,2,0)), animated=True)] for i in img_list]
-    # ani = animation.ArtistAnimation(fig, ims, interval=1000, repeat_delay=1000, blit=True)
+    # Optional plotting
+    if args.doplot:
+        _, axs = plt.subplots(8, 8, figsize=(24, 24))
+        axs = axs.flatten()
 
-    # HTML(ani.to_jshtml())
+        for i, ax in zip(img_list[-1], axs):
+            ax.imshow(np.transpose(i,(1,2,0)))
+        plt.axis("off")
+        plt.tight_layout()
+        plt.savefig('final_out_grid.png')
         
 
 
 if __name__ == '__main__':
     run()
-    sys.stdout.close()

@@ -133,6 +133,7 @@ dependencies:
   - python=3.9.7=h12debd9_1
   - python-dateutil=2.8.2=pyhd3eb1b0_0
   - pytorch=1.10.0=py3.9_cuda11.3_cudnn8.2.0_0
+  - pytorch-lightning=1.5.9
   - pytorch-mutex=1.0=cuda
   - pytz=2021.3=pyhd3eb1b0_0
   - pyzmq=22.3.0=py39h295c915_2
@@ -146,6 +147,7 @@ dependencies:
   - six=1.16.0=pyhd3eb1b0_0
   - sniffio=1.2.0=py39h06a4308_1
   - sqlite=3.36.0=hc218d9a_0
+  - tensorboard=2.6.0
   - terminado=0.9.4=py39h06a4308_0
   - testpath=0.5.0=pyhd3eb1b0_0
   - tk=8.6.11=h1ccaba5_0

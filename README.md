@@ -38,7 +38,6 @@ Key file and folders
 Information on how to contribute can be found in the [Contributing guide](CONTRIBUTING.md).
 
 ## Getting Started
-
 Start by cloning this github repo:
 
 ```bash
@@ -86,7 +85,10 @@ To check if your GPU driver and CUDA is enabled and accessible by PyTorch, in `p
 True
 ```
 
-## Data
+### Isambard :rocket:
+Specific instructions for running on Isambard are detailed [here](isambard-getting-started.md)
+
+## Data :floppy_disk:
 
 Current sources of data used by this repo include:
 

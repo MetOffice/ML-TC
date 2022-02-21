@@ -22,6 +22,15 @@ import random
 import sys
 import net_architectures
 
+
+
+# Define CUDA env variables
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+print(torch.cuda.device_count())
+
+# Parse command line arguments
+
 parser = argparse.ArgumentParser(description='Run GAN With Cyclone Data')
 parser.add_argument('format', metavar='format', type=str, nargs=1, choices=['A','B','C','D','E'], help='data format to use')
 parser.add_argument('net', metavar='net', type=str, nargs=1, choices=["Large_Net", "Small_Net"], help='which network variation to load')

@@ -15,6 +15,7 @@ parser.add_argument('--f', metavar='format', type=str, nargs=1, choices=['A','B'
 parser.add_argument('--h', metavar='hurricane', type=str, nargs=1, help='the name of the hurricane to extract data from')
 parser.add_argument('--p', metavar='pressure', type=int, default=200,nargs='?', help='the pressure level to use where needed')
 parser.add_argument('--v', metavar='variables', type=str, nargs='+', choices=['fg','hur','psl','rsds','rsnds','tas','ua','va','wbpt','zg'], help='the variables to extract')
+parser.add_argument('--e', metavar='ensembles', type=str, nargs=1, choices=['separate','joint'], help='whether to mix the ensembles or keep them separate (ex. to maintain time order')
 args = parser.parse_args()
 print(args)
 def largest_sum(a, n):
@@ -23,17 +24,16 @@ def largest_sum(a, n):
 
 # zg.T3Hpoint.UMRA2T.19951123_19951126.BOB07.4p4km.nc
 # zg.T3Hpoint.UMRA2T.19910428_19910501.BOB01.4p4km.nc
-files=os.listdir('../RawData/')
-print(files)
+files=os.listdir('/projects/metoffice/ml-tc/ML-TC/RawData/')
+#print(files)
 ## load hurricane 	
 variables = args.v
 hurricane = args.h[0]
 files=[f for f in files if '4p4km' in f and 'point' in f and hurricane in f and any(v in f for v in variables)]
-print(files)
+#print(files)
 for variable in variables:
-    wind = xr.open_dataset('../RawData/'+files[0])
+    wind = xr.open_dataset('/projects/metoffice/ml-tc/ML-TC/RawData/'+files[0])
     # print(wind)
-    print(wind)
     wind = wind[vars[variable]]
 
     all_data_points = []
@@ -50,21 +50,19 @@ for variable in variables:
         size=64
     side = int((size)/2)
 
+
     for data_point_time in wind.forecast_reference_time:
+        if args.e[0]=='separate':
+            centre_data_points_cut.append([])
+            #print(centre_data_points_cut)
         for data_point_period in wind.forecast_period:
             if variable in ['hur','va','wbpt','zg']:
                 single_data_point = wind.loc[dict(pressure=args.p,forecast_reference_time=data_point_time, forecast_period = data_point_period)]
             else: 
                 single_data_point = wind.loc[dict(forecast_reference_time=data_point_time, forecast_period = data_point_period)]
             single_data_point = single_data_point.values
-            print(single_data_point.shape) 
+            #print(single_data_point.shape) 
             (r, c) = largest_sum(single_data_point, n = 50)
-
-            # t_data_point.append(data_point_time.values)
-            # p_data_point.append(data_point_period.values)
-            # centres_cols.append(c)
-            # centres_rows.append(r)
-            
             
             data_points_centre = single_data_point[r-side:r+side, c-side:c+side]
             centre_data_points.append(data_points_centre.copy())
@@ -88,8 +86,23 @@ for variable in variables:
             # back[r-side:r+side, c-side:c+side] = data_points_centre
             #filter out empty points
             if np.count_nonzero(~np.isnan(data_points_centre)) > 3000 and (args.f[0]=="A" or (len(data_points_centre)==size and len(data_points_centre[0])==size)):
-                centre_data_points_cut.append(data_points_centre)
+                if args.e[0]=='joint':
+                    centre_data_points_cut.append(data_points_centre)
+                else:
+                    #print(data_points_centre.shape)
+                    centre_data_points_cut[-1].append(np.array(data_points_centre))
+                    #print(type(data_points_centre)) 
+                    #print(len(centre_data_points_cut))
+                    #print(len(centre_data_points_cut[0]))
+                    #print(len(centre_data_points_cut[-1]))
                 
-    print(len(centre_data_points_cut))
     ## save the results
-    np.savez("/projects/metoffice/ml-tc/Data/"+hurricane+"_"+args.f[0]+"_"+variable+".npz",centre_data_points_cut)
+    print("sizes")
+    print(len(centre_data_points_cut))
+    print(len(centre_data_points_cut[0]))
+    #print(len(centre_data_points_cut[0][0]))
+    print(centre_data_points_cut[0][0].shape)
+    if args.e[0] == "separate":
+        centre_data_points_cut=np.array(centre_data_points_cut,dtype="object")
+    np.savez("/projects/metoffice/ml-tc/ML-TC/Data/"+hurricane+"_"+args.f[0]+"_"+variable+"_"+args.e[0]+".npz",centre_data_points_cut)
+    

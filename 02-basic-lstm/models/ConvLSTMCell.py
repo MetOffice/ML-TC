@@ -1,4 +1,3 @@
-# from https://towardsdatascience.com/video-prediction-using-convlstm-with-pytorch-lightning-27b195fd21a2
 import torch.nn as nn
 import torch
 
@@ -35,17 +34,13 @@ class ConvLSTMCell(nn.Module):
                               kernel_size=self.kernel_size,
                               padding=self.padding,
                               bias=self.bias)
-        #self.to(dtype=torch.uint8)(torch.zeros(3, 4, 5, dtype=torch.uint8))
-        #print(self)
-
 
     def forward(self, input_tensor, cur_state):
         h_cur, c_cur = cur_state
-        #print(input_tensor.size())
-        #print(h_cur.size())
+        #print(h_cur.dtype)
+        #print(input_tensor.dtype)
         combined = torch.cat([input_tensor, h_cur], dim=1)  # concatenate along channel axis
-        #print("in cell")
-        #print(combined.size())
+
         combined_conv = self.conv(combined)
         cc_i, cc_f, cc_o, cc_g = torch.split(combined_conv, self.hidden_dim, dim=1)
         i = torch.sigmoid(cc_i)
@@ -55,11 +50,10 @@ class ConvLSTMCell(nn.Module):
 
         c_next = f * c_cur + i * g
         h_next = o * torch.tanh(c_next)
-        #print(h_next.size())
+
         return h_next, c_next
 
     def init_hidden(self, batch_size, image_size):
         height, width = image_size
         return (torch.zeros(batch_size, self.hidden_dim, height, width, device=self.conv.weight.device),
                 torch.zeros(batch_size, self.hidden_dim, height, width, device=self.conv.weight.device))
-

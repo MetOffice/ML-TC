@@ -1,8 +1,7 @@
-#from https://towardsdatascience.com/video-prediction-using-convlstm-with-pytorch-lightning-27b195fd21a2
 import torch
 import torch.nn as nn
 
-from convlstm_cell import ConvLSTMCell
+from models.ConvLSTMCell import ConvLSTMCell
 
 class EncoderDecoderConvLSTM(nn.Module):
     def __init__(self, nf, in_chan):
@@ -16,14 +15,11 @@ class EncoderDecoderConvLSTM(nn.Module):
         # Decoder (3D CNN) - produces regression predictions for our model
 
         """
-        #print(in_chan)
-        #print(nf)
         self.encoder_1_convlstm = ConvLSTMCell(input_dim=in_chan,
                                                hidden_dim=nf,
                                                kernel_size=(3, 3),
                                                bias=True)
-        #print(self.encoder_1_convlstm)
-        
+
         self.encoder_2_convlstm = ConvLSTMCell(input_dim=nf,
                                                hidden_dim=nf,
                                                kernel_size=(3, 3),
@@ -48,19 +44,17 @@ class EncoderDecoderConvLSTM(nn.Module):
     def autoencoder(self, x, seq_len, future_step, h_t, c_t, h_t2, c_t2, h_t3, c_t3, h_t4, c_t4):
 
         outputs = []
-        #print("encoder")
-        #print(x.size())
+
         # encoder
         for t in range(seq_len):
-            h_t, c_t = self.encoder_1_convlstm(input_tensor=x[:, t, :, :, :],
+            h_t, c_t = self.encoder_1_convlstm(input_tensor=x[:, t, :, :],
                                                cur_state=[h_t, c_t])  # we could concat to provide skip conn here
             h_t2, c_t2 = self.encoder_2_convlstm(input_tensor=h_t,
                                                  cur_state=[h_t2, c_t2])  # we could concat to provide skip conn here
 
         # encoder_vector
         encoder_vector = h_t2
-       # print("encoder")
-       # print(encoder_vector.size())
+
         # decoder
         for t in range(future_step):
             h_t3, c_t3 = self.decoder_1_convlstm(input_tensor=encoder_vector,
@@ -69,9 +63,8 @@ class EncoderDecoderConvLSTM(nn.Module):
                                                  cur_state=[h_t4, c_t4])  # we could concat to provide skip conn here
             encoder_vector = h_t4
             outputs += [h_t4]  # predictions
+
         outputs = torch.stack(outputs, 1)
-        #print("encoder")
-        #print(outputs.size())
         outputs = outputs.permute(0, 2, 1, 3, 4)
         outputs = self.decoder_CNN(outputs)
         outputs = torch.nn.Sigmoid()(outputs)
@@ -86,8 +79,6 @@ class EncoderDecoderConvLSTM(nn.Module):
         input_tensor:
             5-D Tensor of shape (b, t, c, h, w)        #   batch, time, channel, height, width
         """
-        #print("encoder forward")
-        #print(x.size())
 
         # find size of different input dimensions
         b, seq_len, _, h, w = x.size()

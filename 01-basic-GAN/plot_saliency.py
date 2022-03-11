@@ -47,7 +47,9 @@ saliency = saliency.reshape(256, 256)
 fig, ax = plt.subplots(1, 3)
 ax[0].imshow(one_img)
 ax[1].imshow(saliency.cpu(), cmap='hot')
-ax[2].imshow(one_img, alpha=saliency.cpu())
+# Use saliency map to define transparency of image
+# ie. what gets plotted is what the network sees TODO: check this interpretation...
+ax[2].imshow(one_img, alpha=saliency.cpu()) 
 plt.tight_layout()
 plt.savefig('saliency.png')
 

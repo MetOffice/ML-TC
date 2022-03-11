@@ -22,8 +22,9 @@ img_list = np.load(DATADIR+'/produced.npy')
 # List model features
 list(gmodel.main.named_children())
 
-# Look at Saliency Maps and Activation maximization plots
-# based on https://github.com/MisaOgura/flashtorch
+# Look at Saliency Maps
+# based on https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80 
+# with some input from https://github.com/MisaOgura/flashtorch, although I can't get flashtorch code to work
 
 # Pick a nice image (TC simulation)
 one_img = img_list[-1,19,0,:,:]  # This particular index looks nice
